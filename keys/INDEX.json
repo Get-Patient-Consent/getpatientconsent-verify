@@ -3,11 +3,11 @@
   "algorithm": "ES256 (ECDSA P-256, SHA-256)",
   "keys": [
     {
-      "key_id": "gpc-env-EXAMPLE",
-      "file": "gpc-env-EXAMPLE.pem",
-      "fingerprint_sha256": "<sha256 of the DER public key>",
-      "status": "example-placeholder",
-      "published_at": "YYYY-MM-DD",
+      "key_id": "gpc-2026-06",
+      "file": "gpc-2026-06.pem",
+      "fingerprint_sha256": "33a712338c0c28240565ced936eb7d54ca17d8b71eea0810dbbe9f9eb3ad3a0d",
+      "status": "active",
+      "published_at": "2026-06-23",
       "retired_at": null
     }
   ]
