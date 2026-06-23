@@ -1,0 +1,13 @@
+{
+  "name": "gpc-verify",
+  "version": "0.1.0",
+  "description": "Independent, dependency-free verifier for Get Patient Consent records",
+  "type": "module",
+  "bin": { "gpc-verify": "verify.mjs" },
+  "exports": "./verify.mjs",
+  "engines": { "node": ">=18" },
+  "license": "MIT",
+  "scripts": {
+    "verify": "node verify.mjs"
+  }
+}

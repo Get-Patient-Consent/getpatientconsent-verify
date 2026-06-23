@@ -1,0 +1,14 @@
+{
+  "comment": "Registry of Get Patient Consent signing keys. Keys are NEVER removed — retired keys stay published forever so historic documents remain verifiable. Each entry's fingerprint is the SHA-256 of the DER SubjectPublicKeyInfo (matches key_fingerprint_sha256 in an integrity record).",
+  "algorithm": "ES256 (ECDSA P-256, SHA-256)",
+  "keys": [
+    {
+      "key_id": "gpc-env-EXAMPLE",
+      "file": "gpc-env-EXAMPLE.pem",
+      "fingerprint_sha256": "<sha256 of the DER public key>",
+      "status": "example-placeholder",
+      "published_at": "YYYY-MM-DD",
+      "retired_at": null
+    }
+  ]
+}
