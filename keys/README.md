@@ -26,5 +26,3 @@ openssl pkey -pubin -in keys/$KEY_ID.pem -outform DER | sha256sum
 
 Then add an entry to `INDEX.json` with the `key_id`, `file`, `fingerprint_sha256`,
 `status: "active"` and `published_at`.
-
-> The example placeholder entry should be removed once a real key is added.

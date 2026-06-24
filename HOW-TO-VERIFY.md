@@ -1,5 +1,13 @@
 # How to verify a Get Patient Consent record
 
+> **If you have the signed PDF**, the record is embedded inside it (PDF/A-3).
+> Extract the files first, then follow the steps below:
+> ```bash
+> pdfdetach -saveall consent.pdf      # writes consent-record.json + consent-record.integrity.json + HOW-TO-VERIFY.txt
+> ```
+> `consent-record.json` is the canonical signed bytes; `consent-record.integrity.json`
+> is the signature + key + trusted-timestamp record referenced below.
+
 You need three things, all of which travel with the document or live in this repo:
 
 - `consent.canonical.json` — the exact canonical bytes that were signed.
@@ -55,3 +63,38 @@ If step 1's fingerprint differs, the record was altered. If step 4 does not prin
 
 None of these steps contacts Get Patient Consent. A complete verification can be
 performed entirely offline.
+
+## Trusted timestamp (proves *when*)
+
+When the integrity record includes a `trusted_timestamp`, it is an **RFC 3161**
+token from an independent timestamp authority (TSA) proving the signature — and
+therefore the signed record — existed at the attested time. The token is taken
+over the **signature**, not the canonical bytes (a timestamp cannot live inside
+the data it certifies), so it is verified against `server_signature`:
+
+```bash
+# The token was issued over SHA-256(server_signature). Recreate that input:
+python3 -c "import json,base64; \
+  open('sig.bin','wb').write(base64.b64decode(json.load(open('consent.integrity.json'))['server_signature']))"
+
+# Extract the token (base64 DER) from the integrity record:
+python3 -c "import json,base64; \
+  open('ts.token','wb').write(base64.b64decode(json.load(open('consent.integrity.json'))['trusted_timestamp']['token_base64']))"
+
+# Verify the token against the signature, using the TSA's CA cert (archived here):
+openssl ts -verify -data sig.bin -in ts.token -CAfile keys/tsa/<tsa>-cacert.pem
+#    -> "Verification: OK"
+
+# Read the attested time:
+openssl ts -reply -in ts.token -text | grep -i "Time stamp"
+```
+
+The TSA's CA certificate is archived under `keys/tsa/` so the token stays
+verifiable offline even if the TSA disappears. The `tsa` field in the record
+names which authority issued it. A genuine `Verification: OK` plus the signature
+check above proves the consent existed, intact, at the stated time — without
+contacting anyone.
+
+> Note: the TSA CA certificate(s) need to be committed under `keys/tsa/` before
+> this step works end-to-end; until then the token is still stored in every
+> record and can be verified once the cert is archived.
