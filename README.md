@@ -48,9 +48,23 @@ integrity record** + the **published public key**. The document embeds the key
 the document itself) can be checked against it. This repo's job is to be the
 independent place those public keys are published and kept forever.
 
-> Note: embedding the record + signature inside a PDF/A‑3 (so a single PDF is
-> self-verifying offline) is on the roadmap; until then verification runs against
-> the canonical JSON and the integrity record.
+Signed consent PDFs are **PDF/A‑3** and carry the canonical record + integrity
+record as embedded files, so a single PDF is self-verifying offline: extract the
+attachments with `pdfdetach -saveall consent.pdf`, then run the recipe above on
+the extracted `consent-record.json` / `consent-record.integrity.json`. Each PDF
+also shows a QR/link to the (convenience) online verifier; the offline check here
+is the root of trust.
+
+## Tests
+
+```bash
+npm test   # node --test, no dependencies
+```
+
+The suite (`test/verify.test.mjs`) runs `verify.mjs` against a vector in
+`test/vectors/` that was produced by the application's **own** signer, proving
+this independent verifier accepts a real app‑produced signature byte‑for‑byte and
+rejects tampering or a wrong key. If the two implementations ever drift, it fails.
 
 ## Licence
 
