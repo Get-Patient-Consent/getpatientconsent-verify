@@ -9,6 +9,14 @@
       "status": "active",
       "published_at": "2026-06-23",
       "retired_at": null
+    },
+    {
+      "key_id": "gpc-2026-10",
+      "file": "gpc-2026-10.pem",
+      "fingerprint_sha256": "8c2240ba78483f939d471a5080ca47d46300ba07b81cbdb862afe8e16e29f792",
+      "status": "active",
+      "published_at": "2026-10-01",
+      "retired_at": null
     }
   ]
 }
