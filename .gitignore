@@ -4,6 +4,7 @@ _tmptest/
 _test_.*
 _test_*
 .codex/
+.settings.*
 
 # Logs
 logs
