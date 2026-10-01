@@ -1,5 +1,15 @@
 {
   "comment": "NON-PRODUCTION signing keys (staging, rehearsal). A document whose integrity record carries one of these fingerprints is a TEST record, never a genuine Get Patient Consent consent. Production keys are in ../INDEX.json only. Same rules otherwise: public keys only, append-only, never delete. fingerprint_sha256 = SHA-256 of the DER SubjectPublicKeyInfo.",
   "algorithm": "ES256 (ECDSA P-256, SHA-256)",
-  "keys": []
+  "keys": [
+    {
+      "key_id": "gpc-staging-2026-10",
+      "file": "gpc-staging-2026-10.pem",
+      "fingerprint_sha256": "708caa06f2d7afd59e44556b919a9a44fba3b3d728227140fdfda3f92be71d3a",
+      "environment": "staging",
+      "status": "active",
+      "published_at": "2026-10-01",
+      "retired_at": null
+    }
+  ]
 }
