@@ -9,6 +9,9 @@
   "license": "MIT",
   "scripts": {
     "verify": "node verify.mjs",
+    "keys:add": "node keys.mjs add",
+    "keys:retire": "node keys.mjs retire",
+    "keys:check": "node keys.mjs check",
     "test": "node --test"
   }
 }

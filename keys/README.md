@@ -15,14 +15,33 @@ and status.
 
 ## Adding a key
 
-```bash
-# Given the public key PEM exported from the signer (or kms:GetPublicKey):
-KEY_ID=gpc-env-2026-06
-cp /path/to/public.pem keys/$KEY_ID.pem
+Use the script — it refuses anything that is not an SPKI EC P-256 **public** key,
+computes the fingerprint with the verifier's own function, and appends to the
+registry. It never commits.
 
-# Compute its fingerprint for INDEX.json:
-openssl pkey -pubin -in keys/$KEY_ID.pem -outform DER | sha256sum
+```bash
+# The app's keygen writes <key_id>.public.pem; the key_id is taken from the filename.
+npm run keys:add -- --pem ~/gpc-keys/gpc-2026-10.public.pem --env production
+# staging keys go to keys/non-production/ with an environment marker:
+npm run keys:add -- --pem ~/gpc-keys/gpc-staging-2026-10.public.pem --env staging
 ```
 
-Then add an entry to `INDEX.json` with the `key_id`, `file`, `fingerprint_sha256`,
-`status: "active"` and `published_at`.
+Then run the `git add`/`commit`/`push` lines it prints. **Push before the key
+signs anything** — the `CONSENT_SIGNING_PUBLIC_KEY_URL` it prints is dead until
+`main` has the file.
+
+## Retiring a key
+
+Only once the app has switched to the new key and the old one has signed its
+last record:
+
+```bash
+npm run keys:retire -- gpc-2026-06
+```
+
+This flips `status` to `retired` and sets `retired_at`. The `.pem` stays.
+
+## Checking
+
+`npm run keys:check` (also part of `npm test`) confirms every registry entry
+points at a file whose fingerprint matches, with no duplicates.

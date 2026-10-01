@@ -95,6 +95,7 @@ web_modules/
 .secrets/
 **/.secrets/
 *.private.pem
+*.private.env
 
 # Local leaflet PDF storage (swap for object storage in serverless deployments)
 local-data/
