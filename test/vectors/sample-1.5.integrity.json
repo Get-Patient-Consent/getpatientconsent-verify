@@ -1,0 +1,9 @@
+{
+  "consent_event_id": "evt_123456",
+  "canonical_sha256": "a5db4bfd89b5a33eac26f2453c5a24981d133e5a898b30cddc9501aff221ed88",
+  "server_signature": "MEUCICykCEvRip4TjIp1WN/lZVL4nc8cnwN3QlH30jnXG2MnAiEA4O1dhDX0hwB5v5U7Dk2DPNAiwQf6H59lm+/+BGtxl2M=",
+  "algorithm": "ES256",
+  "key_id": "gpc-test-vector-1.5",
+  "key_fingerprint_sha256": "440e6132423e661aa2010144ad53801244ee18561ed0e2861ad3b81dd519dac6",
+  "public_key_url": "https://example.test/keys/gpc-test-vector-1.5.pem"
+}

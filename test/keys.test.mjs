@@ -35,7 +35,7 @@ test('refuses a private key, a non-EC key and a non-P-256 key', () => {
 // Scratch copy of the repo so `add`/`retire` resolve paths relative to it.
 function scratch() {
   const dir = mkdtempSync(join(tmpdir(), 'gpc-verify-keys-'));
-  for (const f of ['keys.mjs', 'verify.mjs']) cpSync(join(root, f), join(dir, f));
+  for (const f of ['keys.mjs', 'verify.mjs', 'mark.mjs']) cpSync(join(root, f), join(dir, f));
   cpSync(join(root, 'keys'), join(dir, 'keys'), { recursive: true });
   return dir;
 }

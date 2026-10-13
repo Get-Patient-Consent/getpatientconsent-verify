@@ -15,7 +15,7 @@ import { readFileSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { generateKeyPairSync } from 'node:crypto';
-import { verify, publicKeyFingerprint } from '../verify.mjs';
+import { verify, publicKeyFingerprint, markSvg } from '../verify.mjs';
 
 const here = dirname(fileURLToPath(import.meta.url));
 const vec = (name) => join(here, 'vectors', name);
@@ -49,3 +49,32 @@ test('rejects verification under the wrong key', () => {
   assert.equal(result.verified, false);
   assert.equal(result.checks.signature, false);
 });
+
+// Schema 1.5: the drawn signature is inside the canonical bytes (MARK-FORMAT.md).
+// This vector was also produced by the app's own signer, with a throwaway key.
+const v15 = {
+  canonicalBytes: readFileSync(vec('sample-1.5.canonical.json')),
+  integrity: JSON.parse(readFileSync(vec('sample-1.5.integrity.json'), 'utf8')),
+  publicKeyPem: readFileSync(vec('sample-1.5.public.pem'), 'utf8'),
+};
+
+test('a schema 1.5 record (mark inside the signed bytes) verifies', () => {
+  assert.equal(verify(v15).verified, true);
+});
+
+test('the drawn mark is redrawn from the record alone, as SVG', () => {
+  const svg = markSvg(v15.canonicalBytes);
+  assert.match(svg, /^<svg xmlns="http:\/\/www\.w3\.org\/2000\/svg" viewBox="0 0 1000 400"/);
+  assert.ok((svg.match(/<path /g) ?? []).length > 0);
+});
+
+test('a record sealed before 1.5 has no mark to draw', () => {
+  assert.equal(markSvg(canonicalBytes), null);
+});
+
+test('moving one point of the mark breaks verification', () => {
+  const tampered = Buffer.from(v15.canonicalBytes.toString('utf8').replace('"strokes":[[235,', '"strokes":[[236,'));
+  assert.notDeepEqual(tampered, v15.canonicalBytes);
+  assert.equal(verify({ ...v15, canonicalBytes: tampered }).verified, false);
+});
+

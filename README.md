@@ -23,6 +23,10 @@ NIST P‑256 curve, SHA‑256). Verifying it proves:
 3. **Time** *(when a trusted timestamp is present)* — it existed at a stated time,
    attested by an independent timestamp authority.
 
+From record schema 1.5 the patient's **drawn signature** is inside the signed
+record, so it is verified with everything else and can be redrawn from the record
+alone (`--mark out.svg`). The format is in [`MARK-FORMAT.md`](MARK-FORMAT.md).
+
 It does **not**, by itself, establish that the consent was clinically valid —
 that depends on the consent discussion, the patient's capacity and the
 information provided. The record *evidences* that process.
@@ -61,8 +65,9 @@ is the root of trust.
 npm test   # node --test, no dependencies
 ```
 
-The suite (`test/verify.test.mjs`) runs `verify.mjs` against a vector in
-`test/vectors/` that was produced by the application's **own** signer, proving
+The suite (`test/verify.test.mjs`) runs `verify.mjs` against vectors in
+`test/vectors/` (a 1.1 record, and a 1.5 record carrying a drawn mark) that were
+produced by the application's **own** signer, proving
 this independent verifier accepts a real app‑produced signature byte‑for‑byte and
 rejects tampering or a wrong key. If the two implementations ever drift, it fails.
 

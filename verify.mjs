@@ -12,11 +12,16 @@
 //
 // The signature is standard ES256 (DER), so `openssl` verifies it too — see
 // HOW-TO-VERIFY.md. This tool is a convenience, not the root of trust.
+//
+// Optional: `--mark out.svg` redraws the patient's drawn signature from the
+// record itself (schema 1.5+, `signature_event.mark`), using mark.mjs, a copy of
+// the app's own renderer. See MARK-FORMAT.md.
 
-import { readFileSync } from 'node:fs';
+import { readFileSync, writeFileSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { createHash, createPublicKey, verify as cryptoVerify } from 'node:crypto';
+import { decode as decodeMark, toSvg } from './mark.mjs';
 
 const sha256Hex = (buf) => createHash('sha256').update(buf).digest('hex');
 
@@ -48,6 +53,20 @@ export function verify({ canonicalBytes, integrity, publicKeyPem }) {
   return { verified: hash && signature && fingerprint !== false, checks: { hash, signature, fingerprint } };
 }
 
+/**
+ * The drawn signature as standalone SVG, redrawn from the record's own bytes.
+ * Null when the record carries no mark (typed name only, or schema 1.4 and
+ * earlier, which bound an image held outside the record). Throws if a mark is
+ * present but does not decode.
+ */
+export function markSvg(canonicalBytes) {
+  const mark = JSON.parse(canonicalBytes.toString('utf8')).signature_event?.mark;
+  if (!mark) return null;
+  const decoded = decodeMark(JSON.stringify(mark));
+  if (!decoded.mark) throw new Error(`signature mark does not decode: ${decoded.errors.join('; ')}`);
+  return toSvg(decoded.mark);
+}
+
 // ── CLI ──────────────────────────────────────────────────────────────────────
 
 function parse(argv) {
@@ -61,7 +80,7 @@ function parse(argv) {
 function main() {
   const args = parse(process.argv.slice(2));
   if (!args.canonical || !args.integrity) {
-    console.error('Usage: node verify.mjs --canonical <name.canonical.json> --integrity <name.integrity.json> [--pubkey <pub.pem>] [--keys-dir <dir>]');
+    console.error('Usage: node verify.mjs --canonical <name.canonical.json> --integrity <name.integrity.json> [--pubkey <pub.pem>] [--keys-dir <dir>] [--mark <out.svg>]');
     process.exit(2);
   }
   const here = dirname(fileURLToPath(import.meta.url));
@@ -76,6 +95,15 @@ function main() {
   const result = verify({ canonicalBytes, integrity, publicKeyPem });
   console.log(JSON.stringify({ key_id: integrity.key_id, ...result }, null, 2));
   console.log(result.verified ? 'VERIFIED OK' : 'VERIFICATION FAILED');
+  if (args.mark) {
+    const svg = markSvg(canonicalBytes);
+    if (svg) {
+      writeFileSync(args.mark, svg);
+      console.log(`Signature mark written to ${args.mark}${result.verified ? '' : ' (from a record that did NOT verify)'}`);
+    } else {
+      console.log('No drawn mark in this record (typed name only, or sealed before schema 1.5).');
+    }
+  }
   process.exit(result.verified ? 0 : 1);
 }
 
