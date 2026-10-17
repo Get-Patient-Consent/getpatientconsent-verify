@@ -15,7 +15,8 @@
 > python3 -c "from pypdf import PdfReader; r=PdfReader('consent.pdf'); [open(n,'wb').write(d[0]) for n,d in r.attachments.items()]"
 > ```
 > `consent-record.json` is the canonical signed bytes; `consent-record.integrity.json`
-> is the signature + key + trusted-timestamp record referenced below.
+> is the signature + key + trusted-timestamp record referenced below. What the
+> fields of `consent-record.json` mean is in [`RECORD-FORMAT.md`](RECORD-FORMAT.md).
 
 You need three things, all of which travel with the document or live in this repo:
 

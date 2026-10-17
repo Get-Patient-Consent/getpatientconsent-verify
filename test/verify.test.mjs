@@ -78,3 +78,18 @@ test('moving one point of the mark breaks verification', () => {
   assert.equal(verify({ ...v15, canonicalBytes: tampered }).verified, false);
 });
 
+// Schema 1.6: a record sealed by the running application on 17 Oct 2026 with
+// the PUBLISHED key gpc-2026-06 (keys/), so no vector key file is needed and
+// this also proves the published key verifies a real production-signed record.
+const v16 = {
+  canonicalBytes: readFileSync(vec('sample-1.6.canonical.json')),
+  integrity: JSON.parse(readFileSync(vec('sample-1.6.integrity.json'), 'utf8')),
+  publicKeyPem: readFileSync(join(here, '..', 'keys', 'gpc-2026-06.pem'), 'utf8'),
+};
+
+test('a schema 1.6 record verifies under the published gpc-2026-06 key', () => {
+  const result = verify(v16);
+  assert.equal(result.verified, true);
+  assert.equal(publicKeyFingerprint(v16.publicKeyPem), v16.integrity.key_fingerprint_sha256);
+  assert.equal(JSON.parse(v16.canonicalBytes.toString('utf8')).schema_version, '1.6');
+});

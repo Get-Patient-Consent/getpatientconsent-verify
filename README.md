@@ -5,7 +5,8 @@ verify a Get Patient Consent record:
 
 - the **public signing keys** (current and every retired key — see [`keys/`](keys/)),
 - a small, dependency-free **verification tool** ([`verify.mjs`](verify.mjs)),
-- the step-by-step **manual recipe** using standard tools ([`HOW-TO-VERIFY.md`](HOW-TO-VERIFY.md)).
+- the step-by-step **manual recipe** using standard tools ([`HOW-TO-VERIFY.md`](HOW-TO-VERIFY.md)),
+- what every field of the record **means** ([`RECORD-FORMAT.md`](RECORD-FORMAT.md)), so a verified record can be read without the application.
 
 It is intentionally separate from the application so that consent records remain
 verifiable **regardless of the company's status** — this repo is public,
@@ -66,10 +67,13 @@ npm test   # node --test, no dependencies
 ```
 
 The suite (`test/verify.test.mjs`) runs `verify.mjs` against vectors in
-`test/vectors/` (a 1.1 record, and a 1.5 record carrying a drawn mark) that were
+`test/vectors/` (a 1.1 record, a 1.5 record carrying a drawn mark, and a 1.6
+record sealed with the published `gpc-2026-06` key) that were
 produced by the application's **own** signer, proving
 this independent verifier accepts a real app‑produced signature byte‑for‑byte and
 rejects tampering or a wrong key. If the two implementations ever drift, it fails.
+`test/record-format.test.mjs` walks every key of those vectors and fails if one
+is not described in `RECORD-FORMAT.md`, so the format cannot change undocumented.
 
 ## Licence
 
