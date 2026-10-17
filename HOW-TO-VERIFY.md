@@ -1,9 +1,18 @@
 # How to verify a Get Patient Consent record
 
 > **If you have the signed PDF**, the record is embedded inside it (PDF/A-3).
-> Extract the files first, then follow the steps below:
+> Extract the files first, then follow the steps below. `pdfdetach` is part of
+> Poppler, which is not installed by default:
 > ```bash
+> # macOS:            brew install poppler
+> # Debian / Ubuntu:  sudo apt install poppler-utils
+> # Windows:          winget install oschwartz10612.Poppler   (or use the Python route below)
 > pdfdetach -saveall consent.pdf      # writes consent-record.json + consent-record.integrity.json + HOW-TO-VERIFY.txt
+> ```
+> Any PDF tool that reads embedded files does the same job; with Python and
+> `pip install pypdf`:
+> ```bash
+> python3 -c "from pypdf import PdfReader; r=PdfReader('consent.pdf'); [open(n,'wb').write(d[0]) for n,d in r.attachments.items()]"
 > ```
 > `consent-record.json` is the canonical signed bytes; `consent-record.integrity.json`
 > is the signature + key + trusted-timestamp record referenced below.
