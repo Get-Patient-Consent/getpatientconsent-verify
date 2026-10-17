@@ -81,12 +81,15 @@ python3 -c "import json,base64; \
 python3 -c "import json,base64; \
   open('ts.token','wb').write(base64.b64decode(json.load(open('consent.integrity.json'))['trusted_timestamp']['token_base64']))"
 
-# Verify the token against the signature, using the TSA's CA cert (archived here):
-openssl ts -verify -data sig.bin -in ts.token -CAfile keys/tsa/<tsa>-cacert.pem
+# Verify the token against the signature, using the TSA's CA cert (archived here).
+# `-token_in`: the stored value is the bare TimeStampToken (a CMS SignedData),
+# not the TimeStampResp wrapper; without the flag openssl reports an ASN.1
+# "wrong tag" error, which is a format mismatch, not a tampered record.
+openssl ts -verify -token_in -data sig.bin -in ts.token -CAfile keys/tsa/<tsa>-cacert.pem
 #    -> "Verification: OK"
 
 # Read the attested time:
-openssl ts -reply -in ts.token -text | grep -i "Time stamp"
+openssl ts -reply -token_in -in ts.token -text | grep -i "Time stamp"
 ```
 
 The TSA's CA certificate is archived under `keys/tsa/` so the token stays
