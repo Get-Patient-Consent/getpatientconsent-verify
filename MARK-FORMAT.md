@@ -68,7 +68,7 @@ a "do not edit" header.
 ## Redrawing a mark
 
 ```bash
-node verify.mjs --canonical consent.canonical.json --integrity consent.integrity.json \
+node verify.mjs --canonical consent-record.json --integrity consent-record.integrity.json \
   --mark signature.svg
 ```
 

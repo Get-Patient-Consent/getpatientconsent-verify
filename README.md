@@ -36,7 +36,7 @@ information provided. The record *evidences* that process.
 
 ```bash
 # Using the bundled tool (Node 18+, no install):
-node verify.mjs --canonical consent.canonical.json --integrity consent.integrity.json
+node verify.mjs --canonical consent-record.json --integrity consent-record.integrity.json
 # (the public key is looked up automatically from keys/<key_id>.pem)
 
 # Or verify with stock openssl — see HOW-TO-VERIFY.md

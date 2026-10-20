@@ -17,11 +17,13 @@
 > `consent-record.json` is the canonical signed bytes; `consent-record.integrity.json`
 > is the signature + key + trusted-timestamp record referenced below. What the
 > fields of `consent-record.json` mean is in [`RECORD-FORMAT.md`](RECORD-FORMAT.md).
+> A confirmation PDF carries `confirmation-record.json` +
+> `confirmation-record.integrity.json` instead; substitute those names below.
 
 You need three things, all of which travel with the document or live in this repo:
 
-- `consent.canonical.json` — the exact canonical bytes that were signed.
-- `consent.integrity.json` — the detached integrity record (signature + key id).
+- `consent-record.json` — the exact canonical bytes that were signed.
+- `consent-record.integrity.json` — the detached integrity record (signature + key id).
 - the **public key** — `keys/<key_id>.pem` in this repo (the `key_id` is named in
   the integrity record).
 
@@ -30,7 +32,7 @@ There are two equivalent ways to check it.
 ## Option A — the bundled tool (Node 18+, no install)
 
 ```bash
-node verify.mjs --canonical consent.canonical.json --integrity consent.integrity.json
+node verify.mjs --canonical consent-record.json --integrity consent-record.integrity.json
 ```
 
 The tool looks up `keys/<key_id>.pem` automatically. Pass `--pubkey <file>` to use
@@ -43,20 +45,20 @@ The signature is standard ES256 (DER ECDSA), so OpenSSL verifies it directly.
 
 ```bash
 # 1. Confirm the content fingerprint matches the integrity record
-sha256sum consent.canonical.json
-#    compare to "canonical_sha256" in consent.integrity.json
+sha256sum consent-record.json
+#    compare to "canonical_sha256" in consent-record.integrity.json
 
 # 2. Extract the signature bytes from the integrity record
 python3 -c "import json,base64,sys; \
-  open('sig.bin','wb').write(base64.b64decode(json.load(open('consent.integrity.json'))['server_signature']))"
+  open('sig.bin','wb').write(base64.b64decode(json.load(open('consent-record.integrity.json'))['server_signature']))"
 
 # 3. Confirm you have the right key: its SHA-256 must equal key_fingerprint_sha256
-KEY_ID=$(python3 -c "import json;print(json.load(open('consent.integrity.json'))['key_id'])")
+KEY_ID=$(python3 -c "import json;print(json.load(open('consent-record.integrity.json'))['key_id'])")
 openssl pkey -pubin -in keys/$KEY_ID.pem -outform DER 2>/dev/null | sha256sum
-#    compare to "key_fingerprint_sha256" in consent.integrity.json
+#    compare to "key_fingerprint_sha256" in consent-record.integrity.json
 
 # 4. Verify the signature over the canonical bytes
-openssl dgst -sha256 -verify keys/$KEY_ID.pem -signature sig.bin consent.canonical.json
+openssl dgst -sha256 -verify keys/$KEY_ID.pem -signature sig.bin consent-record.json
 #    -> "Verified OK"
 ```
 
@@ -85,11 +87,11 @@ the data it certifies), so it is verified against `server_signature`:
 ```bash
 # The token was issued over SHA-256(server_signature). Recreate that input:
 python3 -c "import json,base64; \
-  open('sig.bin','wb').write(base64.b64decode(json.load(open('consent.integrity.json'))['server_signature']))"
+  open('sig.bin','wb').write(base64.b64decode(json.load(open('consent-record.integrity.json'))['server_signature']))"
 
 # Extract the token (base64 DER) from the integrity record:
 python3 -c "import json,base64; \
-  open('ts.token','wb').write(base64.b64decode(json.load(open('consent.integrity.json'))['trusted_timestamp']['token_base64']))"
+  open('ts.token','wb').write(base64.b64decode(json.load(open('consent-record.integrity.json'))['trusted_timestamp']['token_base64']))"
 
 # Verify the token against the signature, using the TSA's CA cert (archived here).
 # `-token_in`: the stored value is the bare TimeStampToken (a CMS SignedData),
