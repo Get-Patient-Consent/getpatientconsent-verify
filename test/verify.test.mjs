@@ -11,7 +11,9 @@
 
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { readFileSync } from 'node:fs';
+import { mkdtempSync, readFileSync, symlinkSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { spawnSync } from 'node:child_process';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { generateKeyPairSync } from 'node:crypto';
@@ -92,4 +94,15 @@ test('a schema 1.6 record verifies under the published gpc-2026-06 key', () => {
   assert.equal(result.verified, true);
   assert.equal(publicKeyFingerprint(v16.publicKeyPem), v16.integrity.key_fingerprint_sha256);
   assert.equal(JSON.parse(v16.canonicalBytes.toString('utf8')).schema_version, '1.6');
+});
+
+test('CLI runs when invoked through a symlink in a path with a space (npm bin, macOS /var)', () => {
+  // Regression: the entry-point guard compared import.meta.url to argv[1] as
+  // strings, so this exited 0 with no output — indistinguishable from a pass.
+  const dir = mkdtempSync(join(tmpdir(), 'gpc verify '));
+  const link = join(dir, 'gpc-verify.mjs');
+  symlinkSync(join(here, '..', 'verify.mjs'), link);
+  const res = spawnSync('node', [link, '--canonical', vec('sample.canonical.json'), '--integrity', vec('sample.integrity.json'), '--pubkey', vec('sample.public.pem')], { encoding: 'utf8' });
+  assert.equal(res.status, 0, res.stderr);
+  assert.match(res.stdout, /VERIFIED OK/);
 });

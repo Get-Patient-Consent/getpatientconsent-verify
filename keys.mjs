@@ -14,7 +14,7 @@
 //   - the registry is append-only: `add` refuses a conflicting key_id or
 //     fingerprint, `retire` only flips status, nothing ever deletes.
 
-import { copyFileSync, existsSync, readFileSync, writeFileSync } from 'node:fs';
+import { copyFileSync, existsSync, readFileSync, realpathSync, writeFileSync } from 'node:fs';
 import { basename, join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { createPublicKey } from 'node:crypto';
@@ -212,4 +212,8 @@ function main() {
   }
 }
 
-if (import.meta.url === `file://${process.argv[1]}`) main();
+// Run only when invoked as a script. Compare real paths: import.meta.url is the
+// symlink-resolved, URL-encoded path, argv[1] is as typed, so a naive string
+// compare silently skipped main() (exit 0, no output) via an npm bin symlink,
+// a macOS /var or /tmp path, or a directory name with a space in it.
+if (process.argv[1] && realpathSync(fileURLToPath(import.meta.url)) === realpathSync(process.argv[1])) main();

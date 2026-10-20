@@ -17,7 +17,7 @@
 // record itself (schema 1.5+, `signature_event.mark`), using mark.mjs, a copy of
 // the app's own renderer. See MARK-FORMAT.md.
 
-import { readFileSync, writeFileSync } from 'node:fs';
+import { readFileSync, realpathSync, writeFileSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { createHash, createPublicKey, verify as cryptoVerify } from 'node:crypto';
@@ -107,4 +107,8 @@ function main() {
   process.exit(result.verified ? 0 : 1);
 }
 
-if (import.meta.url === `file://${process.argv[1]}`) main();
+// Run only when invoked as a script. Compare real paths: import.meta.url is the
+// symlink-resolved, URL-encoded path, argv[1] is as typed, so a naive string
+// compare silently skipped main() (exit 0, no output) via an npm bin symlink,
+// a macOS /var or /tmp path, or a directory name with a space in it.
+if (process.argv[1] && realpathSync(fileURLToPath(import.meta.url)) === realpathSync(process.argv[1])) main();
